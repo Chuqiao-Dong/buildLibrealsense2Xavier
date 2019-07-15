@@ -4,7 +4,7 @@
 # MIT License
 
 LIBREALSENSE_DIRECTORY=${HOME}/librealsense
-LIBREALSENSE_VERSION=v2.17.1
+LIBREALSENSE_VERSION=v2.24.0
 INSTALL_DIR=$PWD
 
 
@@ -67,25 +67,25 @@ fi
 git checkout $LIBREALSENSE_VERSION
 
 # Install the dependencies
-cd $INSTALL_DIR
-sudo ./scripts/installDependencies.sh
+#cd $INSTALL_DIR
+#sudo ./scripts/installDependencies.sh
 
 cd $LIBREALSENSE_DIRECTORY
 git checkout $LIBREALSENSE_VERSION
 
-echo "${green}Applying Model-Views Patch${reset}"
+#echo "${green}Applying Model-Views Patch${reset}"
 # The render loop of the post processing does not yield; add a sleep
-# patch -p1 -i $INSTALL_DIR/patches/model-views.patch
+#patch -p1 -i $INSTALL_DIR/patches/model-views.patch
 
-echo "${green}Applying Incomplete Frames Patch${reset}"
+#echo "${green}Applying Incomplete Frames Patch${reset}"
 # The Jetson tends to return incomplete frames at high frame rates; suppress error logging
-# patch -p1 -i $INSTALL_DIR/patches/incomplete-frame.patch
+#patch -p1 -i $INSTALL_DIR/patches/incomplete-frame.patch
 
 
 echo "${green}Applying udev rules${reset}"
 # Copy over the udev rules so that camera can be run from user space
-sudo cp config/99-realsense-libusb.rules /etc/udev/rules.d/
-sudo udevadm control --reload-rules && udevadm trigger
+#sudo cp config/99-realsense-libusb.rules /etc/udev/rules.d/
+#sudo udevadm control --reload-rules && udevadm trigger
 
 # Now compile librealsense and install
 mkdir build 
@@ -94,7 +94,7 @@ cd build
 echo "${green}Configuring Make system${reset}"
 # Use the CMake version that we built, must be > 3.8
 # Build with CUDA (default), the CUDA flag is USE_CUDA, ie -DUSE_CUDA=true
-cmake ../ -DBUILD_EXAMPLES=true -DBUILD_WITH_CUDA=true
+cmake ../ -DBUILD_EXAMPLES=false -DBUILD_WITH_CUDA=false
 # The library will be installed in /usr/local/lib, header files in /usr/local/include
 # The demos, tutorials and tests will located in /usr/local/bin.
 echo "${green}Building librealsense, headers, tools and demos${reset}"
@@ -120,8 +120,13 @@ else
   fi
 fi
 echo "${green}Installing librealsense, headers, tools and demos${reset}"
-sudo make install
+#sudo make install
+make install
 echo "${green}Library Installed${reset}"
+echo "${green}Clean up after install${reset}:"
+cd ..
+rm -rf build
+echo "${green}Done with cleanup${reset}"
 echo " "
 echo " -----------------------------------------"
 echo "The library is installed in /usr/local/lib"
